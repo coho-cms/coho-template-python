@@ -1,0 +1,29 @@
+name: Check
+
+# Version branches only, such as v2026.1.0: pull requests into one, and commits to one.
+on:
+  pull_request:
+    branches: ['v*']
+  push:
+    branches: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync
+      # The generated code must be exactly what the committed type model generates.
+      - name: Generated code is up to date
+        run: uv run coho-codegen check
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - run: uv run pytest
+      - run: uv build

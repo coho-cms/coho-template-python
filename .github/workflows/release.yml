@@ -1,0 +1,47 @@
+name: Release
+
+# Builds the library from a Coho tag, and attaches the wheel to a GitHub release. Run it by
+# hand once the tag is cut, naming the tag and the package version to publish. To publish to
+# a package index instead, such as a private one, replace the last step with `uv publish`.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: The Coho tag to build from, such as v1.4.0
+        required: true
+      version:
+        description: The package version to publish, such as 1.4.0
+        required: true
+
+permissions:
+  # To create the release and attach the wheel to it.
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync
+      # Inputs reach the shell as variables, never pasted into the script, so a crafted tag
+      # name cannot run commands.
+      - name: Pull the type model for the tag
+        run: uv run coho-codegen pull --ref "$REF"
+        env:
+          REF: ${{ inputs.ref }}
+          COHO_TOKEN: ${{ secrets.COHO_TOKEN }}
+      - run: uv run coho-codegen generate
+      - run: uv run mypy
+      - run: uv run pytest
+      - name: Set the version
+        run: uv version "$VERSION"
+        env:
+          VERSION: ${{ inputs.version }}
+      - run: uv build
+      - name: Attach the wheel to a release
+        run: gh release create "v$VERSION" dist/* --title "v$VERSION, from Coho $REF" --notes "Generated from Coho tag $REF." --target "$GITHUB_SHA"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+          REF: ${{ inputs.ref }}

@@ -1,0 +1,8 @@
+{
+  "url": "https://app.coho.example",
+  "account": "your-account-id",
+  "project": "your-project-id",
+  "ref": "v1.0.0",
+  "typeModel": "coho-ir.json",
+  "outDir": "src/yourorg_content/coho"
+}
