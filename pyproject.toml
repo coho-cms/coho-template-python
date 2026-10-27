@@ -5,12 +5,12 @@ description = "Typed content for our sites and services, generated from Coho CMS
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "coho-delivery-sdk~=2026.1.0",
+    "coho-delivery-sdk~=2026.2.0a1",
 ]
 
 [dependency-groups]
 dev = [
-    "coho-codegen~=2026.1.0",
+    "coho-codegen~=2026.2.0a1",
     "pytest>=8.3",
     "mypy>=1.11",
     "ruff>=0.6",
